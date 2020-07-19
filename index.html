@@ -4,8 +4,8 @@
         <title>Forecast App</title>
         <meta name="description" content="Weather forecast">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="favicon.ico" type="image/x-icon"/>
-        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+        <link rel="icon" href="favicon.png" type="image/x-icon"/>
+        <link rel="shortcut icon" href="favicon.png" type="image/x-icon"/>
         <link rel="stylesheet" href="styles.css">
         <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;700&display=swap" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" rel="stylesheet">
@@ -14,14 +14,14 @@
     </head>
     <body>
         <div ng-app="forecastApp">
+
             <div class="app-header">
                 <img src="public/header.png">F<span style="font-size:2rem;">orecast</span>
             </div>
+
             <div ng-controller="appController" ng-init="init()" class="app">
-
                 <div class="input-container">
-
-                    <div class="input-loading flex-center" ng-show="cityDataLoading && !cityAssigned">
+                    <div class="loading-window flex-center" ng-show="cityDataLoading && !cityAssigned">
                         <span>Loading</span>
                         <div class="loading-marble-box flex-center">
                             <div class="marble"></div>
@@ -56,7 +56,8 @@
                     
                     <div ng-show="autoFindOpen" class="input-form-line">
                         <div ng-if="autoLocation === '' " class="label-text">Find automatically:</div>
-                        <div ng-if="autoLocation === '' " style="font-size:0.7rem;padding:2px">(you need to approve geolocation access in your browser)</div>
+                        <div ng-if="autoLocation === '' " style="font-size:0.7rem;padding:2px;text-align:center">
+                            (you need to approve geolocation access in your browser)</div>
                         <div class="flex-center">
                             <div ng-if="autoLocation === '' " ng-click="autoFind()" class="button button-small flex-center">Find <i class="fas fa-search"></i></div>
                             <div ng-if="autoLocation !== '' " class="location-line"> 
@@ -95,7 +96,7 @@
                         {{ serviceErrorMessage }}
                     </div>
 
-                    <div class="forecast-loading flex-center" ng-show="forecastLoading">
+                    <div class="loading-window flex-center" ng-show="forecastLoading">
                         <span>Loading</span>
                         <div class="loading-marble-box flex-center">
                             <div class="marble"></div>
@@ -106,72 +107,74 @@
 
                     <div class="forecast-main-box" ng-show="displayedWeatherData !== undefined"> 
                         <div class="main-box-date">
-                            <div><i class="far fa-calendar-alt" style="opacity:0.5"></i> {{ displayedWeatherData.date }}</div>
+                            <div>
+                                <div>
+                                    <i class="far fa-calendar-alt" style="opacity:0.5"></i> 
+                                    {{ displayedWeatherData.date }}
+                                </div>
+                                <div class="weekday">
+                                    {{ displayedWeatherData.weekDay }}
+                                </div>
+                            </div>
                             <div class="text-link" ng-show="!showingCurrent" ng-click="showCurrent()">Show current</div>
                             <div style="opacity:0.5">{{ displayedWeatherData.time }}</div>
                         </div>
                        <div class="main-box-content" ng-bind-html="returnMainBoxContent(displayedWeatherData.icon, displayedWeatherData.temperature)"></div>
                        <div class="forecast-details-container">
-                            <span><i class="fas fa-wind"></i> {{ displayedWeatherData.wind }} m/s</span>
+                            <span><i class="fas fa-wind" style="opacity:0.5"></i> {{ displayedWeatherData.wind }} m/s</span>
                             <span>{{ displayedWeatherData.description }} </span>
                        </div>
                     </div>
 
-                    <div class="forecast-time-container flex-center" ng-show="displayedWeatherData !== undefined">
-                        <input class="slider" type="range" min="0" max="39" step="1" ng-model="forecastHourIndex" ng-change="forecastRangeHandler()">
-                        <div class="slider-grid">
-                            <div class="slider-grid-endpoint">
-                                <span>{{ fiveDayData[0].dt_txt.slice(10,16) }}</span>
-                                <span>{{ fiveDayData[0].dt_txt.slice(5,10) }}</span>
+                    <div class="flex-center" style="flex-direction:column" ng-show="displayedWeatherData !== undefined">
+
+                        <div class="forecast-time-container flex-center">
+                            <input class="slider" type="range" min="0" max="39" step="1" ng-model="forecastHourIndex" ng-change="forecastRangeHandler()">
+                            <div class="slider-grid">
+                                <div class="slider-grid-endpoint">
+                                    <span>{{ fiveDayData[0].dt_txt.slice(10,16) }}</span>
+                                    <span>{{ fiveDayData[0].dt_txt.slice(5,10) }}</span>
+                                </div>
+                                <div class="slider-grid-endpoint">
+                                    <span>{{ fiveDayData[10].dt_txt.slice(10,16) }}</span>
+                                    <span>{{ fiveDayData[10].dt_txt.slice(5,10) }}</span>
+                                </div>
+                                <div class="slider-grid-endpoint">
+                                    <span>{{ fiveDayData[20].dt_txt.slice(10,16) }}</span>
+                                    <span>{{ fiveDayData[20].dt_txt.slice(5,10) }}</span>
+                                </div>
+                                <div class="slider-grid-endpoint">
+                                    <span>{{ fiveDayData[30].dt_txt.slice(10,16) }}</span>
+                                    <span>{{ fiveDayData[30].dt_txt.slice(5,10) }}</span>
+                                </div>
+                                <div class="slider-grid-endpoint">
+                                    <span>{{ fiveDayData[39].dt_txt.slice(10,16) }}</span>
+                                    <span>{{ fiveDayData[39].dt_txt.slice(5,10) }}</span>
+                                </div>
                             </div>
-                            <div class="slider-grid-endpoint">
-                                <span>{{ fiveDayData[10].dt_txt.slice(10,16) }}</span>
-                                <span>{{ fiveDayData[10].dt_txt.slice(5,10) }}</span>
-                            </div>
-                            <div class="slider-grid-endpoint">
-                                <span>{{ fiveDayData[20].dt_txt.slice(10,16) }}</span>
-                                <span>{{ fiveDayData[20].dt_txt.slice(5,10) }}</span>
-                            </div>
-                            <div class="slider-grid-endpoint">
-                                <span>{{ fiveDayData[30].dt_txt.slice(10,16) }}</span>
-                                <span>{{ fiveDayData[30].dt_txt.slice(5,10) }}</span>
-                            </div>
-                            <div class="slider-grid-endpoint">
-                                <span>{{ fiveDayData[39].dt_txt.slice(10,16) }}</span>
-                                <span>{{ fiveDayData[39].dt_txt.slice(5,10) }}</span>
-                            </div>
+                        </div>
+    
+                        <div class="forecast-day-boxes">
                             
-                        </div>
-                    </div>
-
-                    <div class="forecast-day-boxes" ng-show="displayedWeatherData !== undefined">
-
-                        <div class="forecast-loading flex-center" ng-show="thumbnailData.length === 0 && !serviceError">
-                            <div class="loading-marble-box flex-center">
-                                <div class="marble"></div>
-                                <div class="marble" style="animation-delay:0.15s"></div>
-                                <div class="marble" style="animation-delay:0.3s"></div>
+                            <div class="loading-window flex-center" ng-show="thumbnailData.length === 0 && !serviceError">
+                                <div class="loading-marble-box flex-center">
+                                    <div class="marble"></div>
+                                    <div class="marble" style="animation-delay:0.15s"></div>
+                                    <div class="marble" style="animation-delay:0.3s"></div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="day-box" ng-if="thumbnailData.length > 0" ng-click="setForecastHourIndex(dataobj.id)"
-                            ng-repeat="dataobj in thumbnailData track by $index" key={{$index}}>
-                            <div class="day-box-date">{{dataobj.date}}</div>
-                            <div class="day-box-content" ng-bind-html="returnDayBoxIcon(dataobj.icon, dataobj.temperature)"></div>
-                            <div class="day-box-time">{{dataobj.time}}</div>
+    
+                            <div class="day-box" ng-if="thumbnailData.length > 0" ng-click="setForecastHourIndex(dataobj.id)"
+                                ng-repeat="dataobj in thumbnailData track by $index" key={{$index}}>
+                                <div class="day-box-date">{{dataobj.weekDay.slice(0,3)}}</div>
+                                <div class="day-box-content" ng-bind-html="returnDayBoxIcon(dataobj.icon, dataobj.temperature)"></div>
+                                <div class="day-box-time">{{dataobj.time}}</div>
+                            </div>
+    
                         </div>
 
                     </div>
-                    <!-- <div class="input-loading" ng-if="inputLoading">
-                        <span>Loading</span>
-                        <div class="loading-marble-box flex-center">
-                            <div class="marble"></div>
-                            <div class="marble" style="animation-delay:0.15s"></div>
-                            <div class="marble" style="animation-delay:0.3s"></div>
-                        </div>
-                        <div class="loading-message"> {{ loadingMessage }} </div>
-                    </div> -->
-
+                    
                 </div>
             </div>
         </div>

@@ -4,7 +4,6 @@ const config = {
     apiKey : "2bf6f157641b1e005b65dbcebb02a719"
 }
 
-
 app.controller("appController", function($scope, $sce) {
     $scope.userConfig = {
         units : 'metric'
@@ -68,9 +67,7 @@ app.controller("appController", function($scope, $sce) {
     }
 
     $scope.inputHandler = () => {
-        if ($scope.inputErrorMessage !== "") {
-            $scope.inputErrorMessage = '';
-        }
+        if ($scope.inputErrorMessage !== "") { $scope.inputErrorMessage = "";}
         if ($scope.cityInput.length > 3 && $scope.cityData) {
             $scope.autocompleteOpen = true;
             let input = $scope.cityInput.trim().toLowerCase();
@@ -99,8 +96,8 @@ app.controller("appController", function($scope, $sce) {
 
     $scope.selectCity = () => {
         if ($scope.cityInput.length !== 0) {
-            const cityData = $scope.cityData;
-            const cityInput = $scope.cityInput;
+            let cityData = $scope.cityData;
+            let cityInput = $scope.cityInput;
             for (let i = 0; i < cityData.length; i++) {
                 if (cityData[i].name === cityInput) {
                     $scope.assignCity(cityData[i].name, cityData[i].id);
@@ -108,7 +105,7 @@ app.controller("appController", function($scope, $sce) {
                     return;
                 }
             }
-            $scope.inputErrorMessage = "Sorry, we couldn't find city you are looking for";
+            $scope.inputErrorMessage = "Sorry, we couldn't find the city you were looking for";
             $scope.autocompleteOpen = false;
         }
     }
@@ -166,6 +163,8 @@ app.controller("appController", function($scope, $sce) {
         .then( (response) => {
             return response.json();
         }).then( (data) => {
+            if (!$scope.cityAssigned) return;
+            let timeObj = helpers.convertMilisecondsToDate(data.dt);
             const dataObj = {
                 temperature: data.main.temp,
                 icon: data.weather[0].icon,
@@ -173,7 +172,8 @@ app.controller("appController", function($scope, $sce) {
                 description: helpers.capitalize(data.weather[0].description),
                 wind: data.wind.speed.toFixed(1),
                 date: "Current",
-                time: ""
+                time: timeObj.time,
+                weekDay: timeObj.weekDay
             }
             $scope.forecastLoading = false;
             $scope.displayedWeatherData = dataObj;
@@ -185,6 +185,11 @@ app.controller("appController", function($scope, $sce) {
             .then( (response) => {
                 return response.json();
             }).then( (data) => {
+                if (!$scope.cityAssigned) { 
+                    $scope.forecastHourIndex = 0;
+                    $scope.displayedWeatherData = undefined;
+                    return;
+                }
                 $scope.fiveDayData = data.list;
                 $scope.thumbnailData = helpers.formFiveDayThumbnailData($scope.fiveDayData);
                 $scope.$apply();
@@ -211,6 +216,7 @@ app.controller("appController", function($scope, $sce) {
         $scope.fiveDatyData = [];
         $scope.forecastHourIndex = 0;
         $scope.thumbnailData = [];
+        $scope.forecastLoading = false;
         storeData(null, null);
     }
 
@@ -245,6 +251,7 @@ app.controller("appController", function($scope, $sce) {
     }
 
     $scope.forecastRangeHandler = () => {
+        if ($scope.fiveDayData.length === 0) return;  
         const hour = $scope.forecastHourIndex;
         const data = $scope.fiveDayData[hour];
         const dataObj = {
@@ -254,7 +261,8 @@ app.controller("appController", function($scope, $sce) {
             description: helpers.capitalize(data.weather[0].description),
             wind: data.wind.speed.toFixed(1),
             date: helpers.returnDateString(data.dt_txt.slice(5,10)),
-            time: data.dt_txt.slice(11,16)
+            time: data.dt_txt.slice(11,16),
+            weekDay: helpers.returnWeekDay(data.dt_txt.slice(0,10))
         }
         $scope.showingCurrent = false;
         $scope.displayedWeatherData = dataObj;
@@ -336,45 +344,26 @@ class Helpers {
     }
 
     formFiveDayThumbnailData(array) {
-        let firstDate = array[0].dt_txt.slice(0,10);
-        let firstTime = array[0].dt_txt.slice(11);
         let dateMap = [];
         let results = [];
         for (let i = 0; i < array.length; i++) {
+            let dateString = array[i].dt_txt;
             if (results.length === 5) {
                 break;
             }
-            if (i === 0) {
+            if (i === 0 || ( dateString.slice(11,16) === "12:00" && dateMap.indexOf(dateString.slice(0,10)) === -1 ) 
+            || ( i === array.length - 1 && results.length === 4 ) ) {
                 dateMap.push(array[i].dt_txt.slice(0,10));
                 let dataObj = {
                     date: array[i].dt_txt.slice(5,10),
                     time: array[i].dt_txt.slice(11,16),
+                    weekDay: this.returnWeekDay(array[i].dt_txt.slice(0,10)),
                     id: i,
                     temperature: array[i].main.temp.toFixed(),
                     icon: array[i].weather[0].icon
                 };
                 results.push(dataObj);
-            } else if (array[i].dt_txt.slice(11,19) === "12:00:00" && dateMap.indexOf(array[i].dt_txt.slice(0,10)) === -1) {
-                dateMap.push(array[i].dt_txt.slice(0,10));
-                let dataObj = {
-                    date: array[i].dt_txt.slice(5,10),
-                    time: array[i].dt_txt.slice(11,16),
-                    id: i,
-                    temperature: array[i].main.temp.toFixed(),
-                    icon: array[i].weather[0].icon
-                };
-                results.push(dataObj);
-            } else if (i === array.length - 1 && results.length === 4) {
-                dateMap.push(array[i].dt_txt.slice(0,10));
-                let dataObj = {
-                    date: array[i].dt_txt.slice(5,10),
-                    time: array[i].dt_txt.slice(11,16),
-                    id: i,
-                    temperature: array[i].main.temp.toFixed(),
-                    icon: array[i].weather[0].icon
-                };
-                results.push(dataObj);
-            }
+            } 
         }
         return results
     }
@@ -398,11 +387,12 @@ class Helpers {
             '12' : 'December'
         };
         let dayString = '';
-        if (day === '01') {
+        day = parseInt(day);
+        if (day === 1) {
             dayString = day + 'st'
-        } else if (day === '02') {
+        } else if (day === 2) {
             dayString = day + 'nd'
-        } else if (day === '03') {
+        } else if (day === 3) {
             dayString = day + 'rd'
         } else {
             dayString = day + 'th'
@@ -412,6 +402,50 @@ class Helpers {
 
     capitalize(string) {
         return string.slice(0,1).toUpperCase() + string.slice(1);
+    }
+
+    returnWeekDay(string) {
+        let year = parseInt(string.slice(0,4));
+        let month = parseInt(string.slice(5,7)) - 1;
+        let day = parseInt(string.slice(8,10));
+        let d = new Date(year, month, day);
+        let weekDayIndex = d.getDay();
+        let weekDay = this.returnWeekDayFromindex(weekDayIndex);
+        return weekDay;
+    }
+
+    returnWeekDayFromindex = (index) => {
+        switch( index ) {
+            case 1 :
+                return "Monday"
+            case 2 :
+                return "Tuesday"
+            case 3 :
+                return "Wednesday"
+            case 4 :
+                return "Thursday"
+            case 5 :
+                return "Friday"
+            case 6 :
+                return "Saturday"
+            case 0 :
+                return "Sunday"
+            default :
+                return undefined
+        }
+    }
+
+    convertMilisecondsToDate(ms) {
+        let d = new Date(ms * 1000);
+        let hours = d.getHours() > 9 ? d.getHours().toString() : "0" + d.getHours();
+        let minutes = d.getMinutes() > 9 ? d.getMinutes().toString() : "0" + d.getMinutes();
+        let time = hours + ":" + minutes;
+        let weekDay = this.returnWeekDayFromindex(d.getDay());
+        let obj = {
+            time,
+            weekDay
+        }
+        return obj;
     }
 }
 

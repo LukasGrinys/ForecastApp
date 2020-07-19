@@ -172,17 +172,15 @@ body {
     margin-top: 5px;
     width: 100%;
 }
-.input-loading {
+.loading-window {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background: rgb(182, 187, 192);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     flex-direction: column;
+    z-index: 3;
 }
 
 .loading-marble-box {
@@ -268,6 +266,14 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    position: relative;
+}
+.weekday {
+    position: absolute;
+    top: 25px;
+    left: 5px;
+    opacity: 0.5;
+    font-size: 1rem;
 }
 .main-box-content {
     position: relative;
@@ -347,6 +353,7 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    cursor: default;
   }
   .slider-grid-endpoint {
       font-size: 0.7rem;
@@ -366,7 +373,7 @@ body {
 }
 
 .day-box {
-    width: 68px;
+    width: 60px;
     height: 88px;
     display: flex;
     flex-direction: column;
@@ -422,6 +429,9 @@ body {
         width: 80px;
         font-size: 1.5rem;
         margin: 0 auto;
+    }
+    .day-box-icon {
+        right: 10px;
     }
 }
 
