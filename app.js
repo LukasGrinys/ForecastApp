@@ -162,7 +162,7 @@ app.controller("appController", function($scope, $sce) {
         $scope.fiveDayData = [];
         $scope.thumbnailData = [];
         // Current weather data
-        fetch(`http://api.openweathermap.org/data/2.5/weather?id=${cityId}&appid=${config.apiKey}&units=${$scope.userConfig.units}`)
+        fetch(`https://api.openweathermap.org/data/2.5/weather?id=${cityId}&appid=${config.apiKey}&units=${$scope.userConfig.units}`)
         .then( (response) => {
             return response.json();
         }).then( (data) => {
@@ -181,7 +181,7 @@ app.controller("appController", function($scope, $sce) {
             $scope.forecastLoading = false;
             $scope.$apply();
             // 5 day forecast
-            fetch(`http://api.openweathermap.org/data/2.5/forecast?id=${cityId}&appid=${config.apiKey}&units=${$scope.userConfig.units}`)
+            fetch(`https://api.openweathermap.org/data/2.5/forecast?id=${cityId}&appid=${config.apiKey}&units=${$scope.userConfig.units}`)
             .then( (response) => {
                 return response.json();
             }).then( (data) => {
