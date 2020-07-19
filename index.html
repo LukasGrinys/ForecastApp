@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <title>Forecast App</title>
+        <meta name="description" content="Get your weather forecast">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="styles.css">
+        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;700&display=swap" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+        <script src="app.js"></script>
+    </head>
+    <body>
+        <div ng-app="forecastApp">
+            <div class="app-header">
+                <img src="public/header.png">F<span style="font-size:2rem;">orecast</span>
+            </div>
+            <div ng-controller="appController" ng-init="init()" class="app">
+
+                <div class="input-container">
+
+                    <div class="input-loading flex-center" ng-show="cityDataLoading && !cityAssigned">
+                        <span>Loading</span>
+                        <div class="loading-marble-box flex-center">
+                            <div class="marble"></div>
+                            <div class="marble" style="animation-delay:0.15s"></div>
+                            <div class="marble" style="animation-delay:0.3s"></div>
+                        </div>
+                    </div>
+
+                    <div ng-if="!cityAssigned && !manualInputOpen && !autoFindOpen && cityData" class="input-form-line">
+                        <div class="inner-line">How would you like to choose your city?</div>
+                        <div style="padding:10px;display:flex;justify-content:space-around;align-items:center">
+                            <div class="button button-large flex-center" ng-click="openManualInput()">Type in <i class="far fa-keyboard"></i></div>
+                            <div class="button button-large flex-center" ng-click="openAutoFind()">Auto-find <i class="fas fa-search"></i></div>
+                        </div>
+                    </div>
+
+                    <div ng-show="manualInputOpen" class="input-form-line">
+                        <div class="label-text">Enter your city:</div><br>
+                        <div class="flex-center">
+                            <div class="city-input-container">
+                                <input type="text" id="city" ng-model="cityInput" ng-change="inputHandler()" autocomplete="off">
+                                <div class="autofill" ng-show="autocompleteOpen">
+                                    <div class="autofill-item" ng-repeat="city in cityList track by $index" key="{{$index}}" ng-click="pickCity(city)"> 
+                                        {{ city }} 
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-click="selectCity()" class="button button-small" ng-class="{ 'button-disabled' : cityInput === '' }">Select</div>
+                            <div ng-click="openAutoFind()" class="text-link" style="width:50px">Autofind</div>
+                        </div>
+                    </div>
+                    
+                    <div ng-show="autoFindOpen" class="input-form-line">
+                        <div ng-if="autoLocation === '' " class="label-text">Find automatically:</div>
+                        <div ng-if="autoLocation === '' " style="font-size:0.7rem;padding:2px">(you need to approve geolocation access in your browser)</div>
+                        <div class="flex-center">
+                            <div ng-if="autoLocation === '' " ng-click="autoFind()" class="button button-small flex-center">Find <i class="fas fa-search"></i></div>
+                            <div ng-if="autoLocation !== '' " class="location-line"> 
+                                <i class="fas fa-map-marker-alt location-icon"></i>{{ autoLocation }}
+                            </div>
+                            <div ng-if="autoLocation !== '' " ng-click="selectAutoLocation()" class="button button-small">Confirm</div>
+                            <div ng-click="openManualInput()" class="text-link">Type in</div>
+                        </div>
+                    </div>
+
+                    <div class="inner-line" ng-show="cityName !== null">
+                        <div class="units-container">
+                            <span class="unit" ng-class="{ 'unit-selected' : userConfig.units === 'metric' }"
+                            ng-click="changeUnits('metric')">°C</span>
+                            <span class="unit" ng-class="{ 'unit-selected' : userConfig.units === 'imperial' }"
+                            ng-click="changeUnits('imperial')">°F</span>     
+                        </div>
+                        <h1 class="location-header-text"><i class="fas fa-map-marker-alt location-icon"></i>{{ cityName }}</h1>
+                        <div ng-click="changeLocation()" class="text-link" style="position:absolute;top:2px;left:2px">Change</div>
+                    </div>
+
+                    <div class="input-error-line">
+                        {{ inputErrorMessage }}
+                    </div>
+                </div>
+
+                <div class="hor-line" ng-show="displayedWeatherData !== undefined "></div>
+
+                <div class="forecast-section">
+
+                    <div class="forecast-placeholder flex-center" ng-show="displayedWeatherData === undefined">
+                        The weather forecast will show up here
+                    </div>
+
+                    <div class="forecast-error flex-center" ng-show="serviceError">
+                        {{ serviceErrorMessage }}
+                    </div>
+
+                    <div class="forecast-loading flex-center" ng-show="forecastLoading">
+                        <span>Loading</span>
+                        <div class="loading-marble-box flex-center">
+                            <div class="marble"></div>
+                            <div class="marble" style="animation-delay:0.15s"></div>
+                            <div class="marble" style="animation-delay:0.3s"></div>
+                        </div>
+                    </div>
+
+                    <div class="forecast-main-box" ng-show="displayedWeatherData !== undefined"> 
+                        <div class="main-box-date">
+                            <div><i class="far fa-calendar-alt" style="opacity:0.5"></i> {{ displayedWeatherData.date }}</div>
+                            <div class="text-link" ng-show="!showingCurrent" ng-click="showCurrent()">Show current</div>
+                            <div style="opacity:0.5">{{ displayedWeatherData.time }}</div>
+                        </div>
+                       <div class="main-box-content" ng-bind-html="returnMainBoxContent(displayedWeatherData.icon, displayedWeatherData.temperature)"></div>
+                       <div class="forecast-details-container">
+                            <span><i class="fas fa-wind"></i> {{ displayedWeatherData.wind }} m/s</span>
+                            <span>{{ displayedWeatherData.description }} </span>
+                       </div>
+                    </div>
+
+                    <div class="forecast-time-container flex-center" ng-show="displayedWeatherData !== undefined">
+                        <input class="slider" type="range" min="0" max="39" step="1" ng-model="forecastHourIndex" ng-change="forecastRangeHandler()">
+                        <div class="slider-grid">
+                            <div class="slider-grid-endpoint">
+                                <span>{{ fiveDayData[0].dt_txt.slice(10,16) }}</span>
+                                <span>{{ fiveDayData[0].dt_txt.slice(5,10) }}</span>
+                            </div>
+                            <div class="slider-grid-endpoint">
+                                <span>{{ fiveDayData[10].dt_txt.slice(10,16) }}</span>
+                                <span>{{ fiveDayData[10].dt_txt.slice(5,10) }}</span>
+                            </div>
+                            <div class="slider-grid-endpoint">
+                                <span>{{ fiveDayData[20].dt_txt.slice(10,16) }}</span>
+                                <span>{{ fiveDayData[20].dt_txt.slice(5,10) }}</span>
+                            </div>
+                            <div class="slider-grid-endpoint">
+                                <span>{{ fiveDayData[30].dt_txt.slice(10,16) }}</span>
+                                <span>{{ fiveDayData[30].dt_txt.slice(5,10) }}</span>
+                            </div>
+                            <div class="slider-grid-endpoint">
+                                <span>{{ fiveDayData[39].dt_txt.slice(10,16) }}</span>
+                                <span>{{ fiveDayData[39].dt_txt.slice(5,10) }}</span>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <div class="forecast-day-boxes" ng-show="displayedWeatherData !== undefined">
+
+                        <div class="forecast-loading flex-center" ng-show="thumbnailData.length === 0 && !serviceError">
+                            <div class="loading-marble-box flex-center">
+                                <div class="marble"></div>
+                                <div class="marble" style="animation-delay:0.15s"></div>
+                                <div class="marble" style="animation-delay:0.3s"></div>
+                            </div>
+                        </div>
+
+                        <div class="day-box" ng-if="thumbnailData.length > 0" ng-click="setForecastHourIndex(dataobj.id)"
+                            ng-repeat="dataobj in thumbnailData track by $index" key={{$index}}>
+                            <div class="day-box-date">{{dataobj.date}}</div>
+                            <div class="day-box-content" ng-bind-html="returnDayBoxIcon(dataobj.icon, dataobj.temperature)"></div>
+                            <div class="day-box-time">{{dataobj.time}}</div>
+                        </div>
+
+                    </div>
+                    <!-- <div class="input-loading" ng-if="inputLoading">
+                        <span>Loading</span>
+                        <div class="loading-marble-box flex-center">
+                            <div class="marble"></div>
+                            <div class="marble" style="animation-delay:0.15s"></div>
+                            <div class="marble" style="animation-delay:0.3s"></div>
+                        </div>
+                        <div class="loading-message"> {{ loadingMessage }} </div>
+                    </div> -->
+
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
