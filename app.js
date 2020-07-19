@@ -36,7 +36,7 @@ app.controller("appController", function($scope, $sce) {
     $scope.serviceErrorMessage = '';
 
     $scope.requestForCityData = () => {
-        fetch('city.list.json')
+        fetch('citylistReduced.json')
         .then( (response) => {
             if (response.status === 200) {
                 return response.json();
