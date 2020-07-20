@@ -1,16 +1,20 @@
 const app = angular.module("forecastApp", []);
 
 const config = {
-    apiKey : "2bf6f157641b1e005b65dbcebb02a719"
+    apiKey : "2bf6f157641b1e005b65dbcebb02a719",
+    availableUnits : [
+        'metric', 
+        'imperial'
+    ]
 }
 
 app.controller("appController", function($scope, $sce) {
     $scope.userConfig = {
         units : 'metric'
     }
+    $scope.cityData; // List of all the cities available
+    $scope.cityDataLoading = true; // Sets to false when cities load
 
-    $scope.cityData;
-    $scope.cityDataLoading = true;
     $scope.cityInput = "";
     $scope.cityList = [];
     $scope.autoLocation = '';
@@ -30,12 +34,13 @@ app.controller("appController", function($scope, $sce) {
     $scope.thumbnailData = [];
     $scope.forecastLoading = false;
     $scope.showingCurrent = true;
+    $scope.timeZone = helpers.returnTimeZone();
 
     $scope.serviceError = false;
     $scope.serviceErrorMessage = '';
 
     $scope.requestForCityData = () => {
-        fetch('citylistReduced.json')
+        fetch('currentCitylistReduced.json')
         .then( (response) => {
             if (response.status === 200) {
                 return response.json();
@@ -111,12 +116,12 @@ app.controller("appController", function($scope, $sce) {
     }
 
     $scope.autoFind = () => {
-        let latitude, longitude;
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition( (position) => {
-                latitude = position.coords.latitude; 
-                longitude = position.coords.longitude; 
-                let autolocation = helpers.searchForAClosest( $scope.cityData, latitude, longitude);
+                let latitude = position.coords.latitude; 
+                let longitude = position.coords.longitude; 
+                let cityData = $scope.cityData;
+                let autolocation = helpers.searchForAClosest(cityData, latitude, longitude);
                 $scope.autoLocation = autolocation;
                 $scope.$apply();
             });
@@ -178,7 +183,6 @@ app.controller("appController", function($scope, $sce) {
             $scope.forecastLoading = false;
             $scope.displayedWeatherData = dataObj;
             $scope.showingCurrent = true;
-            $scope.forecastLoading = false;
             $scope.$apply();
             // 5 day forecast
             fetch(`https://api.openweathermap.org/data/2.5/forecast?id=${cityId}&appid=${config.apiKey}&units=${$scope.userConfig.units}`)
@@ -195,9 +199,11 @@ app.controller("appController", function($scope, $sce) {
                 $scope.$apply();
                 
             }).catch( (err) => {
+                $scope.displayedWeatherData = undefined;
                 let message = "Could not access to weather service. Try again later. ";
                 message += "Error: " + err;
                 $scope.showError(message);
+                
             })
         }).catch( (err) => {
             let message = "Could not access to weather service. Try again later. ";
@@ -224,7 +230,6 @@ app.controller("appController", function($scope, $sce) {
         if (cityName === null || cityId === null) {
             localStorage.removeItem('forecast-city-name');
             localStorage.removeItem('forecast-city-id');
-
         } else {
             localStorage.setItem('forecast-city-name', cityName);
             localStorage.setItem('forecast-city-id', cityId);
@@ -268,7 +273,7 @@ app.controller("appController", function($scope, $sce) {
         $scope.displayedWeatherData = dataObj;
     }
 
-    $scope.returnDayBoxIcon = (icon, temperature) => {
+    $scope.returnDayBoxContent = (icon, temperature) => {
         if (icon === 'dataobj.icon') return null;
         let unitString = $scope.userConfig.units === 'metric' ? '°C' : '°F';
         return $sce.trustAsHtml(`
@@ -287,6 +292,30 @@ app.controller("appController", function($scope, $sce) {
         `);
     } 
 
+    $scope.returnLoadingWidget = (showText) => {
+        let textHtml = showText ? '<span>Loading</span>' : '';
+        return $sce.trustAsHtml(`
+            ${textHtml}
+            <div class="loading-marble-box flex-center">
+                <div class="marble"></div>
+                <div class="marble" style="animation-delay:0.15s"></div>
+                <div class="marble" style="animation-delay:0.3s"></div>
+            </div>`)
+    }
+
+    $scope.returnSliderGrid = () => {
+        if ($scope.fiveDayData.length === 0) return null;
+        let html = '';
+        const indexes = [0,10,20,30,39];
+        for (let i = 0; i < indexes.length; i++) {
+            html += `<div class="slider-grid-point">
+                <span>${$scope.fiveDayData[indexes[i]].dt_txt.slice(10,16)}</span>
+                <span>${$scope.fiveDayData[indexes[i]].dt_txt.slice(5,10)}</span>
+            </div>`
+        };
+        return $sce.trustAsHtml(html);
+    }
+
     $scope.setForecastHourIndex = (index) => {
         $scope.forecastHourIndex = index;
         $scope.forecastRangeHandler();
@@ -294,16 +323,15 @@ app.controller("appController", function($scope, $sce) {
 
     $scope.showCurrent = () => {
         $scope.forecastLoading = true;
-        requestForWeatherData();
         $scope.forecastHourIndex = 0;
+        requestForWeatherData();
     }
 
     $scope.changeUnits = (units) => {
-        if ($scope.userConfig.units === units) return;
+        if ($scope.userConfig.units === units || config.availableUnits.indexOf(units) === -1) return;
         $scope.userConfig.units = units;
         localStorage.setItem('forecast-units', units);
         requestForWeatherData();
-
     }
 
     $scope.showError = (error) => {
@@ -371,7 +399,6 @@ class Helpers {
     returnDateString(date) {
         let month = date.slice(0,2);
         let day = date.slice(3,5);
-    
         const map = {
             '01' : 'January',
             '02' : 'February',
@@ -435,8 +462,8 @@ class Helpers {
         }
     }
 
-    convertMilisecondsToDate(ms) {
-        let d = new Date(ms * 1000);
+    convertMilisecondsToDate(unix) {
+        let d = new Date(unix * 1000);
         let hours = d.getHours() > 9 ? d.getHours().toString() : "0" + d.getHours();
         let minutes = d.getMinutes() > 9 ? d.getMinutes().toString() : "0" + d.getMinutes();
         let time = hours + ":" + minutes;
@@ -447,6 +474,20 @@ class Helpers {
         }
         return obj;
     }
+
+    returnTimeZone() {
+        let offset = new Date().getTimezoneOffset();
+        let hours = offset / -60;
+        if (hours > 0) {
+            return 'UTC+' + Math.abs(hours);
+        } else if (hours < 0) {
+            return 'UTC-' + Math.abs(hours);
+        } else {
+            return 'UTC'
+        }
+    };
 }
 
 var helpers = new Helpers();
+
+helpers.returnTimeZone();

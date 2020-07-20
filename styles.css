@@ -8,9 +8,11 @@
     align-items: center;
     justify-content: center;
 }
+.w-100 {
+    width: 100%;
+}
 
 body {
-    /* background: #B8CCAB; */
     background: #1E3143;
     font-family: 'Sora', Arial, Helvetica, sans-serif;
 }
@@ -21,27 +23,30 @@ body {
     max-width: 800px;
     background: rgb(182, 187, 192);
     margin: 15px auto;
-    min-height: 350px;
+    min-height: 510px;
 }
 
 .app-header {
-    width: 100%;
     padding: 10px 5px 5px 5px;
     text-align: center;
     font-size: 2.5rem;
     font-weight: 700;
-    /* color: #1E3143; */
     color: #F1EBCF;
     cursor: default;
     letter-spacing: -2px;
+    animation: appear 0.8s forwards ease-in-out;
 }
 .app-header > img {
     width: 32px;
     height: 32px;
 }
 
+@keyframes appear {
+    0% { transform: translateY(-20px);opacity:0}
+    100% { transform: translateY(0px);opacity:1}
+}
+
 .input-container {
-    width: 100%;
     height: 100px;
     display: flex;
     align-items: center;
@@ -53,7 +58,6 @@ body {
 }
 
 .inner-line {
-    width: 100%;
     text-align: center;
     padding: 5px;
 }
@@ -98,11 +102,10 @@ body {
     cursor: not-allowed;
 }
 
-
 .label-text {
-    width: 100%;
     text-align: center;
 }
+
 .city-input-container {
     position: relative;
     top:0;
@@ -120,7 +123,6 @@ body {
     position: absolute;
     top: 35px;
     left: 0;
-    width: 100%;
     max-height: 185px;
     z-index: 2;
     display: flex;
@@ -130,7 +132,6 @@ body {
     border: 1px solid #2f2f2f;
 }
 .autofill-item {
-    width: 100%;
     padding: 5px;
     border-bottom: 1px solid #f2f2f2;
     background: #f1ebcfea;
@@ -141,7 +142,6 @@ body {
 }
 
 .input-error-line {
-    width: 100%;
     padding: 5px;
     min-height: 35px;
     text-align: center;
@@ -165,12 +165,10 @@ body {
     color: #1E3143;
     text-decoration: underline;
     cursor: pointer;
-
 }
 
 .location-header-text {
     margin-top: 5px;
-    width: 100%;
 }
 .loading-window {
     position: absolute;
@@ -215,7 +213,6 @@ body {
 }
 
 .forecast-section {
-    width: 100%;
     min-height: 360px;
     position: relative;
 }
@@ -252,7 +249,6 @@ body {
 }
 
 .forecast-main-box {
-    width: 100%;
     max-width: 460px;
     height: 240px;
     margin: 0 auto;
@@ -260,13 +256,21 @@ body {
     position: relative;
 }
 .main-box-date {
-    width: 100%;
     font-weight: 700;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     position: relative;
+    cursor: default;
+}
+.timezone {
+    position: absolute;
+    top: 25px;
+    right: 0;
+    font-size:0.6rem;
+    font-weight:300;
+    opacity: 0.5;
 }
 .weekday {
     position: absolute;
@@ -278,7 +282,6 @@ body {
 .main-box-content {
     position: relative;
     height: 180px;
-    width: 100%;
 }
 
 .main-box-icon {
@@ -296,15 +299,13 @@ body {
     z-index:2;
 }
 
-.forecast-time-container {
-    width: 100%;
+.forecast-slider-container {
     height: 60px;
     padding: 5px;
     display: flex;
     flex-direction: column;
 }
 .forecast-details-container {
-    width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -327,7 +328,7 @@ body {
     transition: opacity 0.2s;
 }
   
-  .slider::-webkit-slider-thumb {
+.slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 15px;
@@ -335,16 +336,16 @@ body {
     border-radius: 50%; 
     background: #4AACB8;
     cursor: pointer;
-  }
+}
   
-  .slider::-moz-range-thumb {
+.slider::-moz-range-thumb {
     width: 15px;
     height: 15px;
     border-radius: 50%;
     background: #4AACB8;
     cursor: pointer;
-  }
-  .slider-grid {
+}
+.slider-grid {
     width: 100%;
     max-width: 420px;
     height: 8px;
@@ -354,14 +355,14 @@ body {
     align-items: center;
     justify-content: space-between;
     cursor: default;
-  }
-  .slider-grid-endpoint {
-      font-size: 0.7rem;
-      opacity: 0.5;
-      width: 45px;
-      text-align: center;
-  }
+}
 
+.slider-grid-point {
+    font-size: 0.7rem;
+    opacity: 0.5;
+    width: 45px;
+    text-align: center;
+}
 
 .forecast-day-boxes {
     padding: 5px;
@@ -388,11 +389,9 @@ body {
 .day-box-date {
     font-size: 0.7rem;
     font-weight:bold;
-    width: 100%;
     text-align: center;
 }
 .day-box-content {
-    width: 100%;
     height: 60px;
     position: relative;
     font-size: 1.2rem;
@@ -411,7 +410,6 @@ body {
     top: 30px;
 }
 .day-box-time {
-    width: 100%;
     font-size: 0.7rem;
     text-align: center;
     opacity: 0.7;
