@@ -1,0 +1,23 @@
+<div class="forecast-main-box w-100 animation-fade-in" ng-if="$ctrl.displayedWeatherData !== undefined"> 
+    <div class="main-box-date w-100">
+        <div>
+            <div>
+                <i class="far fa-calendar-alt" style="opacity:0.5"></i> 
+                {{ $ctrl.displayedWeatherData.date }}
+            </div>
+            <div class="weekday">
+                {{ $ctrl.displayedWeatherData.weekDay }}
+            </div>
+        </div>
+        <div class="text-link" ng-show="!$ctrl.showingCurrent" ng-click="$ctrl.showCurrent()">Show current</div>
+        <div style="opacity:0.5">
+            {{ $ctrl.displayedWeatherData.time }}
+        </div>
+        <div class="timezone">{{$ctrl.timeZone}}</div>
+    </div>
+   <div class="main-box-content w-100" ng-bind-html="$ctrl.returnMainBoxContent($ctrl.displayedWeatherData.icon, $ctrl.displayedWeatherData.temperature)"></div>
+   <div class="forecast-details-container w-100">
+        <span><i class="fas fa-wind" style="opacity:0.5"></i> {{ $ctrl.displayedWeatherData.wind }} m/s</span>
+        <span>{{ $ctrl.displayedWeatherData.description }} </span>
+   </div>
+</div>

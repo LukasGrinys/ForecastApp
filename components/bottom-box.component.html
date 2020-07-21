@@ -1,0 +1,21 @@
+<div class="flex-center" style="flex-direction:column" ng-init="$ctrl.init()">
+
+    <div class="forecast-slider-container flex-center w-100 animation-appear" ng-show="$scope.$parent.thumbnailData.length !== 0">
+        <input class="slider" type="range" min="0" max="39" step="1" ng-model="$ctrl.forecastHourIndex" 
+        ng-change="$ctrl.forecastRangeHandler()">
+        <div class="slider-grid w-100" ng-bind-html="$ctrl.returnSliderGrid()"></div>
+    </div>
+
+    <div class="forecast-day-boxes animation-appear">
+        <div class="loading-window flex-center" ng-show="$ctrl.thumbnailData.length === 0 && !serviceError">
+            <loading-widget></loading-widget>
+        </div>
+
+        <div class="day-box" ng-if="$ctrl.thumbnailData.length > 0" ng-click="$ctrl.setForecastHourIndex(dataobj.id)"
+            ng-repeat="dataobj in $ctrl.thumbnailData track by $index" key={{$index}}>
+            <div class="day-box-date w-100">{{dataobj.weekDay.slice(0,3)}}</div>
+            <div class="day-box-content w-100" ng-bind-html="$ctrl.returnDayBoxContent(dataobj.icon, dataobj.temperature)"></div>
+            <div class="day-box-time w-100">{{dataobj.time}}</div>
+        </div>
+    </div>
+</div>

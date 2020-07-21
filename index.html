@@ -10,139 +10,45 @@
         <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;700&display=swap" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+        <script src="lib/Helpers.js"></script>
         <script src="app.js"></script>
+        <script src="config.js"></script>
+        <script src="factories/cityData.js"></script>
+        <script src="factories/weatherService.js"></script>
+        <script src="factories/storageHandler.js"></script>
+        <script src="components/loading-widget.component.js"></script>
+        <script src="components/units-container.component.js"></script>
+        <script src="components/input-box.component.js"></script>
+        <script src="components/main-box.component.js"></script>
+        <script src="components/bottom-box.component.js"></script>
     </head>
     <body>
         <div ng-app="forecastApp">
-            <div class="app-header w-100">
+            <div class="app-header w-100 animation-appear">
                 <img src="public/header.png">F<span style="font-size:2rem;">orecast</span>
             </div>
-            <div ng-controller="appController" ng-init="init()" class="app">
-                <div class="input-container w-100">
+            <div ng-controller="appController" class="app">
 
-                    <div class="loading-window flex-center" ng-show="cityDataLoading && !cityAssigned" 
-                    ng-bind-html="returnLoadingWidget(true)"></div>
-
-                    <div ng-if="!cityAssigned && !manualInputOpen && !autoFindOpen && cityData" class="input-form-line">
-                        <div class="inner-line w-100">How would you like to choose your city?</div>
-                        <div style="padding:10px;display:flex;justify-content:space-around;align-items:center">
-                            <div class="button button-large flex-center" ng-click="openManualInput()">Type in <i class="far fa-keyboard"></i></div>
-                            <div class="button button-large flex-center" ng-click="openAutoFind()">Auto-find <i class="fas fa-search"></i></div>
-                        </div>
-                    </div>
-
-                    <div ng-show="manualInputOpen" class="input-form-line">
-                        <div class="label-text w-100">Enter your city:</div><br>
-                        <div class="flex-center">
-                            <div class="city-input-container">
-                                <input type="text" id="city" ng-model="cityInput" ng-change="inputHandler()" autocomplete="off">
-                                <div class="autofill w-100" ng-show="autocompleteOpen">
-                                    <div class="autofill-item w-100" ng-repeat="city in cityList track by $index" key="{{$index}}" 
-                                    ng-click="pickCity(city)"> 
-                                        {{ city }} 
-                                    </div>
-                                </div>
-                            </div>
-                            <div ng-click="selectCity()" class="button button-small" ng-class="{ 'button-disabled' : cityInput === '' }">
-                                Select
-                            </div>
-                            <div ng-click="openAutoFind()" class="text-link" style="width:50px">Autofind</div>
-                        </div>
-                    </div>
-                    
-                    <div ng-show="autoFindOpen" class="input-form-line">
-                        <div ng-if="autoLocation === '' " class="label-text w-100">Find automatically:</div>
-                        <div ng-if="autoLocation === '' " style="font-size:0.7rem;padding:2px;text-align:center">
-                            (you need to approve geolocation access in your browser)</div>
-                        <div class="flex-center">
-                            <div ng-if="autoLocation === '' " ng-click="autoFind()" class="button button-small flex-center">
-                                Find <i class="fas fa-search"></i>
-                            </div>
-                            <div ng-if="autoLocation !== '' " class="location-line"> 
-                                <i class="fas fa-map-marker-alt location-icon"></i>{{ autoLocation }}
-                            </div>
-                            <div ng-if="autoLocation !== '' " ng-click="selectAutoLocation()" class="button button-small">
-                                Confirm
-                            </div>
-                            <div ng-click="openManualInput()" class="text-link">Type in</div>
-                        </div>
-                    </div>
-
-                    <div class="inner-line w-100" ng-show="cityName !== null">
-                        <div class="units-container">
-                            <span class="unit" ng-class="{ 'unit-selected' : userConfig.units === 'metric' }"
-                            ng-click="changeUnits('metric')">°C</span>
-                            <span class="unit" ng-class="{ 'unit-selected' : userConfig.units === 'imperial' }"
-                            ng-click="changeUnits('imperial')">°F</span>     
-                        </div>
-                        <h1 class="location-header-text w-100"><i class="fas fa-map-marker-alt location-icon"></i>{{ cityName }}</h1>
-                        <div ng-click="changeLocation()" class="text-link" style="position:absolute;top:2px;left:2px">Change</div>
-                    </div>
-
-                    <div class="input-error-line w-100">
-                        {{ inputErrorMessage }}
-                    </div>
-                </div>
-
+                <input-box update-displayed-data="updateDisplayedData(dataObj,isCurrent)" get-weather-data="getWeatherData()"
+                clean-five-day-data="$ctrl.cleanFiveDayData()"></input-box>
+                
                 <div class="hor-line" ng-show="displayedWeatherData !== undefined "></div>
 
                 <div class="forecast-section w-100">
-
                     <div class="forecast-placeholder flex-center" ng-show="displayedWeatherData === undefined">
                         The weather forecast will show up here
                     </div>
-
-                    <div class="forecast-error flex-center" ng-show="serviceError">
-                        {{ serviceErrorMessage }}
+                    <div class="forecast-error flex-center" ng-show="serviceError">{{ serviceErrorMessage }}</div>
+                    <div class="loading-window flex-center" ng-show="forecastLoading">
+                        <loading-widget showtext="true"></loading-widget>
                     </div>
-
-                    <div class="loading-window flex-center" ng-show="forecastLoading" ng-bind-html="returnLoadingWidget(true)"></div>
-
-                    <div class="forecast-main-box w-100" ng-show="displayedWeatherData !== undefined"> 
-                        <div class="main-box-date w-100">
-                            <div>
-                                <div>
-                                    <i class="far fa-calendar-alt" style="opacity:0.5"></i> 
-                                    {{ displayedWeatherData.date }}
-                                </div>
-                                <div class="weekday">
-                                    {{ displayedWeatherData.weekDay }}
-                                </div>
-                            </div>
-                            <div class="text-link" ng-show="!showingCurrent" ng-click="showCurrent()">Show current</div>
-                            <div style="opacity:0.5">
-                                {{ displayedWeatherData.time }}
-                            </div>
-                            <div class="timezone">{{timeZone}}</div>
-                        </div>
-                       <div class="main-box-content w-100" ng-bind-html="returnMainBoxContent(displayedWeatherData.icon, displayedWeatherData.temperature)"></div>
-                       <div class="forecast-details-container w-100">
-                            <span><i class="fas fa-wind" style="opacity:0.5"></i> {{ displayedWeatherData.wind }} m/s</span>
-                            <span>{{ displayedWeatherData.description }} </span>
-                       </div>
-                    </div>
-
-                    <div class="flex-center" style="flex-direction:column" ng-show="displayedWeatherData !== undefined">
-
-                        <div class="forecast-slider-container flex-center w-100" ng-show="thumbnailData.length !== 0">
-                            <input class="slider" type="range" min="0" max="39" step="1" ng-model="forecastHourIndex" 
-                            ng-change="forecastRangeHandler()">
-                            <div class="slider-grid w-100" ng-bind-html="returnSliderGrid()"></div>
-                        </div>
-    
-                        <div class="forecast-day-boxes">
-                            
-                            <div class="loading-window flex-center" ng-show="thumbnailData.length === 0 && !serviceError" 
-                            ng-bind-html="returnLoadingWidget(false)"></div>
-    
-                            <div class="day-box" ng-if="thumbnailData.length > 0" ng-click="setForecastHourIndex(dataobj.id)"
-                                ng-repeat="dataobj in thumbnailData track by $index" key={{$index}}>
-                                <div class="day-box-date w-100">{{dataobj.weekDay.slice(0,3)}}</div>
-                                <div class="day-box-content w-100" ng-bind-html="returnDayBoxContent(dataobj.icon, dataobj.temperature)"></div>
-                                <div class="day-box-time w-100">{{dataobj.time}}</div>
-                            </div>
-    
-                        </div>
+                    <main-box ng-show="displayedWeatherData !== undefined" displayed-weather-data="displayedWeatherData" 
+                    forecast-loading="forecastLoading" showing-current="showingCurrent" show-current="showCurrent()"></main-box>  
+                    <div ng-show="displayedWeatherData !== undefined">
+                        <loading-widget ng-if="fiveDayData.length === 0" showtext='false' ></loading-widget>
+                        <bottom-box ng-if="fiveDayData.length > 0" fivedaydata="fiveDayData" 
+                           update-displayed-data="updateDisplayedData(dataObj, isCurrent)" forecasthourindex="forecastHourIndex">
+                        </bottom-box>
                     </div>
                 </div>
             </div>

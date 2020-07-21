@@ -1,0 +1,60 @@
+<div class="input-container w-100">
+    <div class="loading-window flex-center" ng-show="$ctrl.cityDataLoading && !$ctrl.cityAssigned">
+        <loading-widget showtext="true"></loading-widget>
+    </div>
+
+    <div ng-show="!$ctrl.manualInputOpen && !$ctrl.autoFindOpen && $ctrl.currentCityList && !$ctrl.cityAssigned" class="input-form-line">
+        <div class="inner-line w-100">How would you like to choose your city?</div>
+        <div style="padding:10px;display:flex;justify-content:space-around;align-items:center">
+            <div class="button button-large flex-center" ng-click="$ctrl.openManualInput()">Type in <i class="far fa-keyboard"></i></div>
+            <div class="button button-large flex-center" ng-click="$ctrl.openAutoFind()">Auto-find <i class="fas fa-search"></i></div>
+        </div>
+    </div>
+
+    <div ng-show="$ctrl.manualInputOpen" class="input-form-line">
+        <div class="label-text w-100">Enter your city:</div><br>
+        <div class="flex-center">
+            <div class="city-input-container">
+                <input type="text" id="city" ng-model="$ctrl.cityInput" ng-change="$ctrl.inputHandler()" autocomplete="off">
+                <div class="autofill w-100" ng-show="$ctrl.autocompleteOpen">
+                    <div class="autofill-item w-100" ng-repeat="city in $ctrl.citySearchResults track by $index" key="{{$index}}" 
+                    ng-click="$ctrl.pickCity(city)"> 
+                        {{ city }} 
+                    </div>
+                </div>
+            </div>
+            <div ng-click="$ctrl.selectCity()" class="button button-small" ng-class="{ 'button-disabled' : $ctrl.cityInput === '' }">
+                Select
+            </div>
+            <div ng-click="$ctrl.openAutoFind()" class="text-link" style="width:50px">Autofind</div>
+        </div>
+    </div>
+
+    <div ng-show="$ctrl.autoFindOpen && !$ctrl.cityAssigned" class="input-form-line">
+        <div ng-if="$ctrl.autoLocation === '' " class="label-text w-100">Find automatically:</div>
+        <div ng-if="$ctrl.autoLocation === '' " style="font-size:0.7rem;padding:2px;text-align:center">
+            (you need to approve geolocation access in your browser)</div>
+        <div class="flex-center">
+            <div ng-if="$ctrl.autoLocation === '' " ng-click="$ctrl.autoFind()" class="button button-small flex-center">
+                Find <i class="fas fa-search"></i>
+            </div>
+            <div ng-if="$ctrl.autoLocation !== '' " class="location-line"> 
+                <i class="fas fa-map-marker-alt location-icon"></i>{{ $ctrl.autoLocation }}
+            </div>
+            <div ng-if="$ctrl.autoLocation !== '' " ng-click="$ctrl.selectAutoLocation()" class="button button-small">
+                Confirm
+            </div>
+            <div ng-click="$ctrl.openManualInput()" class="text-link">Type in</div>
+        </div>
+    </div>
+
+    <div class="inner-line w-100" ng-show="$ctrl.cityAssigned">
+        <units-container get-weather-data="$ctrl.getWeatherData()"></units-container>
+        <h1 class="location-header-text w-100"><i class="fas fa-map-marker-alt location-icon"></i>{{ $ctrl.cityName }}</h1>
+        <div ng-click="$ctrl.changeLocation()" class="text-link" style="position:absolute;top:2px;left:2px">Change</div>
+    </div>
+
+    <div class="input-error-line w-100">
+        {{ $ctrl.inputErrorMessage }}
+    </div>
+</div>

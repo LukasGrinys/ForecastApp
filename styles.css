@@ -34,16 +34,10 @@ body {
     color: #F1EBCF;
     cursor: default;
     letter-spacing: -2px;
-    animation: appear 0.8s forwards ease-in-out;
 }
 .app-header > img {
     width: 32px;
     height: 32px;
-}
-
-@keyframes appear {
-    0% { transform: translateY(-20px);opacity:0}
-    100% { transform: translateY(0px);opacity:1}
 }
 
 .input-container {
@@ -448,4 +442,20 @@ body {
     font-weight: bold;
     color: #1e3143;
     opacity: 1;
+    cursor: default;
+}
+
+.animation-appear {
+    animation: appear 0.8s forwards ease-in-out;
+}
+@keyframes appear {
+    0% { transform: translateY(-20px);opacity:0}
+    100% { transform: translateY(0px);opacity:1}
+}
+.animation-fade-in {
+    animation: fade-in 0.5s forwards ease-in-out;
+}
+@keyframes fade-in {
+    0% { opacity:0}
+    100% { opacity:1}
 }
