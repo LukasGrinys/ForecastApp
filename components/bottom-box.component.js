@@ -36,7 +36,7 @@ angular.module('forecastApp').component('bottomBox', {
                 time: data.dt_txt.slice(11,16),
                 weekDay: helpers.returnWeekDay(data.dt_txt.slice(0,10))
             }
-            this.updateDisplayedData({ dataObj:dataObj, isCurrent:false });
+            this.updateDisplayedData({ dataObj:dataObj });
         }
 
         this.setForecastHourIndex = (index) => {

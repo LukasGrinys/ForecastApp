@@ -6,14 +6,14 @@ app.factory('weatherService', function(cityData, $http) {
         requestForCurrentWeatherData : function() {
             let cityId = cityData.cityId !== null ? cityData.cityId : false;
             if (!cityId) return;
-            let apiKey = config.API_KEY;
+            let apiKey = config.API_PUBLIC_KEY;
             let units = weatherService.data.units;
             return $http.get(`https://api.openweathermap.org/data/2.5/weather?id=${cityId}&appid=${apiKey}&units=${units}`);
         },
         requestForFiveDayForecastData : function() {
             let cityId = cityData.cityId !== null ? cityData.cityId : false;
             if (!cityId) return;
-            let apiKey = config.API_KEY;
+            let apiKey = config.API_PUBLIC_KEY;
             let units = weatherService.data.units;
             return $http.get(`https://api.openweathermap.org/data/2.5/forecast?id=${cityId}&appid=${apiKey}&units=${units}`)
         },

@@ -69,18 +69,18 @@ app.controller("appController", function($scope, cityData, weatherService, stora
         })
     }
 
-    $scope.updateDisplayedData = (dataObj, isCurrent) => {
-        $scope.showingCurrent = isCurrent;
+    $scope.updateDisplayedData = (dataObj) => {
+        $scope.showingCurrent = false;
         $scope.displayedWeatherData = dataObj;
-    }
-
-    this.cleanFiveDayData = () => {
-        $scope.fiveDayData = [];
     }
 
     $scope.showCurrent = () => {
         $scope.forecastLoading = true;
         $scope.getWeatherData();
+    }
+
+    this.cleanFiveDayData = () => {
+        $scope.fiveDayData = [];
     }
 
     this.showError = (error) => {
