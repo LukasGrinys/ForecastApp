@@ -1,3 +1,19 @@
+window.addEventListener('load', e => {
+    registerSW(); 
+});
+
+async function registerSW() { 
+    if ('serviceWorker' in navigator) { 
+      try {
+        await navigator.serviceWorker.register('./serviceWorker.js'); 
+      } catch (e) {
+        alert('ServiceWorker registration failed. Sorry about that.'); 
+      }
+    } else {
+      document.querySelector('.alert').removeAttribute('hidden'); 
+    }
+}
+
 const app = angular.module("forecastApp", []);
 
 app.controller("appController", function($scope, cityData, weatherService, storageHandler) {
