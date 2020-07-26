@@ -4,9 +4,7 @@ self.addEventListener('install', async event => {
   
 self.addEventListener('fetch', async event => {
     const req = event.request;
-    if (/.*(json)$/.test(req.url)) {
-        event.respondWith(networkFirst(req));
-    } else {
+    if (!req.url.includes('api.openweathermap')) {
         event.respondWith(cacheFirst(req));
     }
 });
